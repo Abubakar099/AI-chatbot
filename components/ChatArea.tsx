@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import ChatMessage from '@/components/ChatMessage'
 import ChatInput from '@/components/ChatInput'
 import { askGemini, getChatSession } from '@/app/actions/chats'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 interface Message {
   id: string
@@ -14,25 +14,26 @@ interface Message {
 }
 
 const ChatArea = () => {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('chat')
   
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Load chat history when session changes
+  // Load chat history when session ID changes (from URL)
   useEffect(() => {
     const loadChat = async () => {
-      if (currentSessionId) {
+      if (sessionId) {
         try {
-          const session = await getChatSession(currentSessionId)
+          const session = await getChatSession(sessionId)
           if (session) {
             setMessages(session.messages)
           }
         } catch (error) {
           console.error("[v0] Failed to load chat:", error)
+          setMessages([])
         }
       } else {
         setMessages([])
@@ -40,7 +41,7 @@ const ChatArea = () => {
     }
 
     loadChat()
-  }, [currentSessionId])
+  }, [sessionId])
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -62,17 +63,18 @@ const ChatArea = () => {
     setIsLoading(true)
 
     try {
-      const result = await askGemini(currentSessionId, content)
+      const result = await askGemini(sessionId, content)
       
-      // Set session ID if this is a new chat
-      if (!currentSessionId) {
-        setCurrentSessionId(result.sessionId)
-      }
-
-      // Reload chat to get saved messages from DB
-      const session = await getChatSession(result.sessionId)
-      if (session) {
-        setMessages(session.messages)
+      // If this was a new chat, update the URL
+      if (!sessionId) {
+        router.push(`/?chat=${result.sessionId}`)
+        // The URL update will trigger the useEffect to load the messages
+      } else {
+        // For existing chats, reload messages immediately
+        const session = await getChatSession(result.sessionId)
+        if (session) {
+          setMessages(session.messages)
+        }
       }
     } catch (error) {
       console.error("[v0] Chat error:", error)
