@@ -6,7 +6,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -30,5 +30,8 @@ model Message {
   role      String   // "user" or "model" (Gemini uses 'model' instead of 'assistant')
   content   String
   createdAt DateTime @default(now())
+  isEdited  Boolean  @default(false)
+  editedAt  DateTime?
   chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  @@index([chatId])
 }

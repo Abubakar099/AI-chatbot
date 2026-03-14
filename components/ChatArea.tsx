@@ -7,19 +7,21 @@ import { askGemini } from '@/app/actions/chats'
 
 interface Message {
   id: string
-  type: 'user' | 'ai'
+  type: 'user' | 'model'
   content: string
+  isEdited?: boolean
 }
 
 const ChatArea = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      type: 'ai',
+      type: 'model',
       content: 'Hello! I\'m Gemini, your AI assistant. How can I help you today? I can help with writing, coding, analysis, math, creative projects, and much more.',
     },
   ])
   const [isLoading, setIsLoading] = useState(false)
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -29,7 +31,7 @@ const ChatArea = () => {
   }, [messages])
 
   const handleSendMessage = async (content: string) => {
-    if (!content.trim()) return
+    if (!content.trim() || isLoading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -40,23 +42,30 @@ const ChatArea = () => {
     setMessages((prev) => [...prev, userMessage])
     setIsLoading(true)
 
-    // Simulate AI response delay
-   try {
-    // Call the Server Action
-    const result = await askGemini(null, content) // Pass actual sessionId if you have it
+    try {
+      // Call the Server Action
+      const result = await askGemini(currentChatId, content)
+      setCurrentChatId(result.chatId)
 
-    const aiMessage: Message = {
-      id: Date.now().toString(),
-      type: 'ai',
-      content: result.aiResponse,
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'model',
+        content: result.aiResponse,
+      }
+      setMessages((prev) => [...prev, aiMessage])
+    } catch (error) {
+      console.error("Gemini Error:", error)
+      // Add error message to chat
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'model',
+        content: 'Sorry, I encountered an error processing your message. Please try again.',
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
     }
-    setMessages((prev) => [...prev, aiMessage])
-  } catch (error) {
-    console.error("Gemini Error:", error)
-  } finally {
-    setIsLoading(false)
   }
-}
 
   const isEmptyChat = messages.length === 1
 
