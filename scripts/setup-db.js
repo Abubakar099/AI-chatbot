@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 import Database from 'better-sqlite3';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.join(__dirname, '..', 'dev.db');
+// Simple approach: use current working directory
+const dbPath = 'dev.db';
 
-console.log(`[v0] Setting up database at ${dbPath}`);
+console.log(`[v0] Creating database at: ${dbPath}`);
+console.log(`[v0] CWD: ${process.cwd()}`);
 
 const db = new Database(dbPath);
 
