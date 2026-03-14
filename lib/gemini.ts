@@ -1,0 +1,9 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// The constructor takes the string directly: new GoogleGenerativeAI("API_KEY")
+const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+// Use the latest flash model for speed and cost-efficiency
+export const model = ai.getGenerativeModel({ 
+  model: "gemini-2.0-flash" 
+});

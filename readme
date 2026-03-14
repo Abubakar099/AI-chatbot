@@ -1,0 +1,9 @@
+hooks same files
+utils same files
+style > global.css
+next.confi.mjs
+
+url      = env("DATABASE_URL")
+npx prisma studio --config ./prisma.config.ts   
+npx prisma migrate dev --name init
+npx prisma studio
