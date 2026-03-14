@@ -16,6 +16,16 @@ export function SetupCheck({ children }: SetupCheckProps) {
     const checkSetup = async () => {
       const newErrors: string[] = []
 
+      // Initialize Prisma client
+      try {
+        console.log('[v0] Initializing Prisma client...')
+        const prismaResponse = await fetch('/api/prisma-init')
+        const prismaData = await prismaResponse.json()
+        console.log('[v0] Prisma init response:', prismaData)
+      } catch (error) {
+        console.error('[v0] Prisma init error:', error)
+      }
+
       // Check environment variables
       try {
         const response = await fetch('/api/init')
