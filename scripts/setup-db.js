@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import Database from 'better-sqlite3';
+import { spawn } from 'child_process';
 
 // Simple approach: use current working directory
 const dbPath = 'dev.db';
@@ -37,5 +38,20 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS chat_sessions_updatedAt_idx ON chat_sessions(updatedAt DESC);
 `);
 
-console.log('[v0] Database setup complete!');
+console.log('[v0] Database tables created!');
 db.close();
+
+// Run prisma generate to create client files
+console.log('[v0] Running prisma generate...');
+const prismaGen = spawn('npx', ['prisma', 'generate'], {
+  stdio: 'inherit',
+  shell: true
+});
+
+prismaGen.on('close', (code) => {
+  if (code === 0) {
+    console.log('[v0] Setup complete! Prisma client generated successfully.');
+  } else {
+    console.error('[v0] Prisma generation failed with code', code);
+  }
+});
