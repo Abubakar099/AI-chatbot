@@ -1,23 +1,24 @@
-// import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-// import { PrismaClient } from "@prisma/client";
-// import Database from "better-sqlite3";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaClient } from "@prisma/client";
+import Database from "better-sqlite3";
 
-// const db = new Database("dev.db");
-// const adapter = new PrismaBetterSqlite3(db);
-// const prisma = new PrismaClient({ adapter });
+let prisma: PrismaClient;
 
-// export { prisma };
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient();
+} else {
+  let globalPrisma = global as unknown as { prisma?: PrismaClient };
+  
+  if (!globalPrisma.prisma) {
+    const db = new Database(process.env.DATABASE_URL || 'dev.db');
+    const adapter = new PrismaBetterSqlite3(db);
+    globalPrisma.prisma = new PrismaClient({ adapter });
+  }
+  
+  prisma = globalPrisma.prisma;
+}
 
-
-import { PrismaClient } from '@prisma/client'
-
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
-
-export const prisma = globalForPrisma.prisma || new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
-})
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+export { prisma };
 
 
 
