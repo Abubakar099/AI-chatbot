@@ -5,6 +5,7 @@ import { useChatContext } from "@/context/ChatContext"
 import ConversationItem from "./ConversationaItem"
 import { useState } from "react"
 
+
 export default function Sidebar() {
   const { conversations, createNewChat, currentConversationId } = useChatContext()
   const [isOpen, setIsOpen] = useState(true)
@@ -16,14 +17,14 @@ export default function Sidebar() {
         onClick={() => setIsOpen(!isOpen)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[#1e1f20] rounded-lg hover:bg-[#2b2c2f] transition-colors"
       >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
+        {isOpen ? <X size={20} className="sm:w-7 sm:h-7" /> : <Menu size={20} className="sm:w-7 sm:h-7" />}
       </button>
+
 
       {/* Sidebar */}
       <aside
-        className={`${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed lg:relative lg:translate-x-0 z-40 w-64 h-full bg-[#1e1f20] p-4 flex flex-col transition-transform duration-200`}
+        className={`${isOpen ? "translate-x-0" : "-translate-x-full"
+          } fixed lg:relative lg:translate-x-0 z-40 w-64 h-full  bg-[#1e1f20] p-4 py-15 flex flex-col transition-transform duration-200`}
       >
         {/* New Chat Button */}
         <button
@@ -36,7 +37,7 @@ export default function Sidebar() {
 
         {/* Conversations List */}
         <div className="flex-1 overflow-y-auto">
-          {conversations.length === 0 ? (
+          {conversations.length === 0 ? ( 
             <div className="flex flex-col items-center justify-center h-32 text-[#9aa0a6]">
               <MessageSquare size={24} className="mb-2 opacity-50" />
               <p className="text-sm">No conversations yet</p>
